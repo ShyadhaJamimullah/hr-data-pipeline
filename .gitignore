@@ -1,0 +1,11 @@
+data/
+*.pbix
+airflow-docker/logs/
+airflow-docker/plugins/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+venv/
+.env

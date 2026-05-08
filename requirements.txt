@@ -1,0 +1,8 @@
+pandas
+numpy
+mysql-connector-python
+SQLAlchemy
+apache-airflow
+apache-airflow-providers-mysql
+python-dotenv
+confluent-kafka
