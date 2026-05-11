@@ -295,7 +295,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ../data:/var/lib/mysql-files
 
-    zookeeper:
+  zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
     environment:
