@@ -12,26 +12,26 @@ logging.basicConfig(
 )
 
 
-KAFKA_TOPIC = "hr_daily_snapshot_events"
-KAFKA_BOOTSTRAP_SERVER = "kafka:29092"
+KAFKA_TOPIC="hr_daily_snapshot_events"
+KAFKA_BOOTSTRAP_SERVER="kafka:29092"
 
 
 def send_snapshot_to_kafka(snapshot_date):
-    file_name = f"snapshot_{snapshot_date.replace('-', '')}.csv"
-    file_path = os.path.join("/opt/airflow/data", file_name)
+    file_name=f"snapshot_{snapshot_date.replace('-', '')}.csv"
+    file_path=os.path.join("/opt/airflow/data", file_name)
 
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Snapshot file not found: {file_path}")
 
-    df = pd.read_csv(file_path)
+    df=pd.read_csv(file_path)
 
-    producer = KafkaProducer(
+    producer=KafkaProducer(
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
         value_serializer=lambda value: json.dumps(value, default=str).encode("utf-8"),
         key_serializer=lambda key: str(key).encode("utf-8")
     )
 
-    sent_count = 0
+    sent_count=0
 
     for _, row in df.iterrows():
         event = row.to_dict()

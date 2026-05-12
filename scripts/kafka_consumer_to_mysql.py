@@ -12,15 +12,15 @@ logging.basicConfig(
 )
 
 
-KAFKA_TOPIC = "hr_daily_snapshot_events"
-KAFKA_BOOTSTRAP_SERVER = "kafka:29092"
+KAFKA_TOPIC="hr_daily_snapshot_events"
+KAFKA_BOOTSTRAP_SERVER="kafka:29092"
 
 
 def consume_snapshot_events(snapshot_date):
-    mysql_password = os.getenv("MYSQL_ROOT_PASSWORD")
-    mysql_database = os.getenv("MYSQL_DATABASE")
+    mysql_password=os.getenv("MYSQL_ROOT_PASSWORD")
+    mysql_database=os.getenv("MYSQL_DATABASE")
 
-    consumer = KafkaConsumer(
+    consumer=KafkaConsumer(
         KAFKA_TOPIC,
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVER,
         auto_offset_reset="earliest",
@@ -30,7 +30,7 @@ def consume_snapshot_events(snapshot_date):
         consumer_timeout_ms=15000
     )
 
-    conn = mysql.connector.connect(
+    conn=mysql.connector.connect(
         host="mysql",
         port=3306,
         user="root",
@@ -38,7 +38,7 @@ def consume_snapshot_events(snapshot_date):
         database=mysql_database
     )
 
-    cursor = conn.cursor()
+    cursor=conn.cursor()
 
     delete_query = """
     DELETE FROM hr_transactions_raw
