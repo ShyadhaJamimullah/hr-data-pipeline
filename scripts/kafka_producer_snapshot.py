@@ -4,6 +4,12 @@ import time
 import os
 import pandas as pd
 from kafka import KafkaProducer
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 KAFKA_TOPIC = "hr_daily_snapshot_events"
@@ -38,13 +44,14 @@ def send_snapshot_to_kafka(snapshot_date):
         )
 
         sent_count += 1
-        print(f"Sent EmployeeID {event['EmployeeID']} to Kafka")
+        logging.info(
+            f"Sent EmployeeID {event['EmployeeID']} to Kafka topic {KAFKA_TOPIC}"
+        )
         time.sleep(0.01)
 
-    producer.flush()
-    producer.close()
-
-    print(f"Sent {sent_count} records to Kafka topic: {KAFKA_TOPIC}")
+    logging.info(
+        f"Successfully sent {sent_count} records to Kafka topic: {KAFKA_TOPIC}"
+    )
 
 
 if __name__ == "__main__":

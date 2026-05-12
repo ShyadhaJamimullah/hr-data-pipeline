@@ -1,8 +1,15 @@
 import json
 import sys
 import os
+
+import logging
 from kafka import KafkaConsumer
 import mysql.connector
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 KAFKA_TOPIC = "hr_daily_snapshot_events"
@@ -91,7 +98,9 @@ def consume_snapshot_events(snapshot_date):
     conn.close()
     consumer.close()
 
-    print(f"Inserted {inserted_count} records into hr_transactions_raw for {snapshot_date}")
+    logging.info(
+    f"Inserted {inserted_count} records into hr_transactions_raw for {snapshot_date}"
+)
 
 
 if __name__ == "__main__":
