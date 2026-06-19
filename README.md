@@ -105,8 +105,8 @@ Create `airflow-docker/.env`:
 
 ```dotenv
 AIRFLOW_UID=50000
-POSTGRES_PASSWORD=airflow
-MYSQL_ROOT_PASSWORD=root
+POSTGRES_PASSWORD=<choose-a-password>
+MYSQL_ROOT_PASSWORD=<choose-a-password>
 MYSQL_DATABASE=hr_db
 MYSQL_PORT=3307
 ```
