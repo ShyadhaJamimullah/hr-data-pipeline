@@ -66,10 +66,10 @@ def consume_snapshot_events(snapshot_date):
 
     cursor.execute(delete_query, (snapshot_date,))
 
-    inserted_count =0
+    inserted_count=0
 
     for message in consumer:
-        event = message.value
+        event=message.value
 
         if str(event.get("SnapshotDate")) != snapshot_date:
             continue

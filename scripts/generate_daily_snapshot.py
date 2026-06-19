@@ -6,7 +6,7 @@ import sys
 
 def generate_daily_snapshot(snapshot_date):
 
-    snapshot_date = datetime.strptime(snapshot_date, "%Y-%m-%d").date()
+    snapshot_date=datetime.strptime(snapshot_date, "%Y-%m-%d").date()
 
     master_path="/opt/airflow/data/employee_master.csv"
 
