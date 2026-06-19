@@ -132,6 +132,8 @@ Open the Airflow UI at [http://localhost:8080](http://localhost:8080). The local
 
 ### 4. Create the Airflow MySQL connection
 
+You only need to create the Airflow connection named `hr_mysql`. The `hr_db` database is created automatically by Docker Compose using the `MYSQL_DATABASE` setting.
+
 In the Airflow UI, open **Admin > Connections**, add a connection, and use:
 
 | Field | Value |
