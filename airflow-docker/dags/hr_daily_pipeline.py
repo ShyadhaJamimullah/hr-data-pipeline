@@ -18,10 +18,7 @@ with DAG(
     template_searchpath=["/opt/airflow/sql"]
 ) as dag:
     
-    generate_csv=BashOperator(
-        task_id="generate_csv",
-        bash_command="python /opt/airflow/scripts/generate_daily_snapshot.py {{ds}}"
-    )
+
 
     create_tables=MySqlOperator(
         task_id="create_tables",
@@ -29,17 +26,25 @@ with DAG(
         sql="create_tables.sql"
     )
 
-
-    load_raw=MySqlOperator(
-        task_id="load_csv",
-        mysql_conn_id="hr_mysql",
-        sql="""
-        LOAD DATA INFILE '/var/lib/mysql-files/snapshot_{{ ds_nodash }}.csv'
-        INTO TABLE hr_transactions_raw
-        FIELDS TERMINATED BY ','
-        IGNORE 1 ROWS;
-        """
+    generate_csv=BashOperator(
+        task_id="generate_csv",
+        bash_command="python /opt/airflow/scripts/generate_daily_snapshot.py {{ds}}"
     )
+
+    send_to_kafka = BashOperator(
+        task_id="send_to_kafka",
+        bash_command="python /opt/airflow/scripts/kafka_producer_snapshot.py {{ ds }}"
+    )
+
+    consume_from_kafka = BashOperator(
+        task_id="consume_from_kafka",
+        bash_command="python /opt/airflow/scripts/kafka_consumer_to_mysql.py {{ ds }}",
+        env={
+            "MYSQL_ROOT_PASSWORD": "root",
+            "MYSQL_DATABASE": "hr_db"
+        }
+    )
+
 
     prepare_staging=MySqlOperator(
         task_id="prepare_staging",
@@ -60,7 +65,7 @@ with DAG(
         sql="transform_daily.sql"
     )
 
-    create_tables >> generate_csv >> load_raw >> prepare_staging >> transform_daily 
+    create_tables >> generate_csv >> send_to_kafka >> consume_from_kafka >> prepare_staging >> transform_daily 
     
     
 
