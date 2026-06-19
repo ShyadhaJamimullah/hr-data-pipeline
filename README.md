@@ -99,9 +99,35 @@ Generated CSV files live in `data/`, and Airflow runtime logs live in `airflow-d
 
 ## Getting started
 
-### 1. Configure local environment variables
+Open a terminal in the `airflow-docker` folder. From the repository root, you can enter it with:
 
-Create `airflow-docker/.env`:
+```powershell
+cd airflow-docker
+```
+
+Run all Docker Compose commands below from this directory.
+
+### Normal use
+
+After the project has been initialized once, start the complete pipeline stack with:
+
+```powershell
+docker compose up -d
+```
+
+Then:
+
+1. Open the Airflow UI at [http://localhost:8080](http://localhost:8080).
+2. Sign in with your configured Airflow credentials.
+3. Unpause `hr_daily_pipeline` if it is paused.
+4. Trigger `hr_daily_pipeline` from the UI.
+5. Trigger `hr_monthly_pipeline` after daily fact data exists when you want to refresh the monthly aggregates.
+
+### First-time setup
+
+#### 1. Configure local environment variables
+
+Create `.env` inside the `airflow-docker` directory:
 
 ```dotenv
 AIRFLOW_UID=50000
@@ -113,24 +139,22 @@ MYSQL_PORT=3307
 
 These values are suitable only for local development. The current DAG passes `root` to the Kafka consumer, so `MYSQL_ROOT_PASSWORD` must match it unless the DAG is changed to use a different secret-management approach.
 
-### 2. Build and initialize Airflow
-
-From the repository root:
+#### 2. Build and initialize Airflow
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml build
-docker compose -f airflow-docker/docker-compose.yaml up airflow-init
+docker compose build
+docker compose up airflow-init
 ```
 
-### 3. Start the services
+Start the services after initialization:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml up -d
+docker compose up -d
 ```
 
-Open the Airflow UI at [http://localhost:8080](http://localhost:8080). The local default login is `airflow` / `airflow` unless it is overridden in `.env`.
+The local default Airflow login is `airflow` / `airflow` unless it is overridden in `.env`.
 
-### 4. Create the Airflow MySQL connection
+#### 3. Create the Airflow MySQL connection
 
 You only need to create the Airflow connection named `hr_mysql`. The `hr_db` database is created automatically by Docker Compose using the `MYSQL_DATABASE` setting.
 
@@ -148,23 +172,25 @@ In the Airflow UI, open **Admin > Connections**, add a connection, and use:
 
 The port is `3306` inside the Docker network even though MySQL is exposed as `3307` on the host by default.
 
-### 5. Generate the employee master
+#### 4. Generate the employee master
 
 The daily DAG expects `/opt/airflow/data/employee_master.csv`. Generate the initial 500-record file once:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml exec airflow-scheduler python /opt/airflow/scripts/create_employee_master.py
+docker compose exec airflow-scheduler python /opt/airflow/scripts/create_employee_master.py
 ```
 
-### 6. Run the pipelines
+After this one-time setup, use the normal workflow above to start the services and trigger the pipelines from the Airflow UI.
 
-In the Airflow UI:
+### Official Airflow Compose download
 
-1. Unpause `hr_daily_pipeline`.
-2. Trigger it or wait for its daily schedule.
-3. After daily fact data exists, unpause and trigger `hr_monthly_pipeline`.
+The [official Airflow Docker quick start](https://airflow.apache.org/docs/apache-airflow/2.8.1/howto/docker-compose/index.html) uses the following command to download its standard Compose file:
 
-The daily DAG passes its Airflow logical date (`YYYY-MM-DD`) through the CSV generator, Kafka producer, Kafka consumer, staging refresh, and SQL transformation steps.
+```bash
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.8.1/docker-compose.yaml'
+```
+
+On Windows PowerShell, use `curl.exe` if `curl` is mapped to `Invoke-WebRequest`. This repository already includes a customized `airflow-docker/docker-compose.yaml` with Kafka and MySQL, so do not run the download command inside this project unless you intend to replace that file. Docker downloads the Airflow image when the Compose stack is built or started.
 
 ## Data model
 
@@ -182,35 +208,37 @@ The daily fact table uses `(EmployeeID, SnapshotDate)` as its primary key. The m
 
 ## Useful commands
 
+Run these commands from the `airflow-docker` directory.
+
 View service status:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml ps
+docker compose ps
 ```
 
 Follow Airflow scheduler logs:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml logs -f airflow-scheduler
+docker compose logs -f airflow-scheduler
 ```
 
 Follow Kafka or MySQL logs:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml logs -f kafka
-docker compose -f airflow-docker/docker-compose.yaml logs -f mysql
+docker compose logs -f kafka
+docker compose logs -f mysql
 ```
 
 Open a MySQL shell:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml exec mysql mysql -uroot -p hr_db
+docker compose exec mysql mysql -uroot -p hr_db
 ```
 
 Stop the stack without deleting persisted data:
 
 ```powershell
-docker compose -f airflow-docker/docker-compose.yaml down
+docker compose down
 ```
 
 
